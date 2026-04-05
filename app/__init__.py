@@ -18,7 +18,9 @@ def create_app():
     jwt.init_app(app)
 
     from app.routes.auth import auth
+    from app.routes.admin import admin
     app.register_blueprint(auth)
+    app.register_blueprint(admin)
 
     with app.app_context():
         from app import models
