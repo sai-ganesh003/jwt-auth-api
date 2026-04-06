@@ -8,13 +8,44 @@ from flask_jwt_extended import (
 )
 from app import db, bcrypt
 from app.models import User
-from flask_jwt_extended import get_jwt
-
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/register', methods=['POST'])
 def register():
+    """
+    Register a new user
+    ---
+    tags:
+      - Auth
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - email
+            - password
+          properties:
+            username:
+              type: string
+              example: saiganesh
+            email:
+              type: string
+              example: sai@example.com
+            password:
+              type: string
+              example: secret123
+    responses:
+      201:
+        description: User registered successfully
+      400:
+        description: Missing fields
+      409:
+        description: Email or username already exists
+    """
     data = request.get_json()
 
     if not data or not data.get('username') or not data.get('email') or not data.get('password'):
@@ -43,6 +74,35 @@ def register():
 
 @auth.route('/login', methods=['POST'])
 def login():
+    """
+    Login and get JWT tokens
+    ---
+    tags:
+      - Auth
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              example: sai@example.com
+            password:
+              type: string
+              example: secret123
+    responses:
+      200:
+        description: Login successful, returns access and refresh tokens
+      400:
+        description: Missing fields
+      401:
+        description: Invalid credentials
+    """
     data = request.get_json()
 
     if not data or not data.get('email') or not data.get('password'):
@@ -71,6 +131,19 @@ def login():
 @auth.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
+    """
+    Get new access token using refresh token
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: New access token
+      401:
+        description: Invalid or expired refresh token
+    """
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     return jsonify({"access_token": access_token}), 200
@@ -79,6 +152,21 @@ def refresh():
 @auth.route('/me', methods=['GET'])
 @jwt_required()
 def me():
+    """
+    Get current logged in user details
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Current user details
+      401:
+        description: Missing or invalid token
+      404:
+        description: User not found
+    """
     identity = get_jwt_identity()
     user = User.query.get(int(identity))
     if not user:
@@ -90,13 +178,26 @@ def me():
         "role": user.role
     }), 200
 
+
 @auth.route('/logout', methods=['DELETE'])
 @jwt_required()
 def logout():
+    """
+    Logout and revoke access token
+    ---
+    tags:
+      - Auth
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Successfully logged out
+      401:
+        description: Missing or invalid token
+    """
     jti = get_jwt()['jti']
     from app.models import TokenBlocklist
     blocked_token = TokenBlocklist(jti=jti)
     db.session.add(blocked_token)
     db.session.commit()
     return jsonify({"message": "successfully logged out"}), 200
-

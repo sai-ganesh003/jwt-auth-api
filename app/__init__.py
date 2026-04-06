@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flasgger import Swagger
 from app.config import Config
 
 db = SQLAlchemy()
@@ -16,6 +17,20 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
+
+    app.config['SWAGGER'] = {
+        'title': 'JWT Auth API',
+        'uiversion': 3,
+        'securityDefinitions': {
+            'Bearer': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header',
+                'description': 'Enter: Bearer <your_token>'
+            }
+        }
+    }
+    Swagger(app)
 
     from app.routes.auth import auth
     from app.routes.admin import admin
