@@ -2,9 +2,9 @@
 
 A production-ready JWT Authentication REST API built with Flask, MySQL, and bcrypt.
 
-## Live Demo
-Base URL: `https://jwt-auth-api-production-61d5.up.railway.app`
-Swagger Docs: `https://jwt-auth-api-production-61d5.up.railway.app/apidocs`
+## Local Setup
+
+Run locally with MySQL. See setup instructions below.
 
 ## Tech Stack
 - Python 3.11, Flask
@@ -14,7 +14,7 @@ Swagger Docs: `https://jwt-auth-api-production-61d5.up.railway.app/apidocs`
 - Token blocklist for real logout
 - Role-based access control (RBAC)
 - Swagger UI via Flasgger
-- Deployed on Railway
+
 
 ## Features
 - `POST /register` — create user with hashed password
